@@ -29,6 +29,36 @@ package_version = "1.3.0a1"
 description = """With dbt, data analysts and engineers can build analytics \
 the way engineers build applications."""
 
+_install_requires = [
+    "agate>=1.6,<1.6.4",
+    "click>=7.0,<9",
+    "colorama>=0.3.9,<0.4.6",
+    "hologram>=0.0.14,<=0.0.15",
+    "isodate>=0.6,<0.7",
+    "logbook>=1.5,<1.6",
+    "mashumaro==2.9",
+    "minimal-snowplow-tracker==0.0.2",
+    "networkx>=2.3,<2.8.1;python_version<'3.8'",
+    "networkx>=2.3,<3;python_version>='3.8'",
+    "packaging>=20.9,<22.0",
+    "sqlparse>=0.2.3,<0.5",
+    "typing-extensions>=3.7.4",
+    "werkzeug>=1,<3",
+    # the following are all to match snowflake-connector-python
+    "requests<3.0.0",
+    "idna>=2.5,<4",
+    "cffi>=1.9,<2.0.0",
+]
+
+if "DBT_WASM_BUILD" in os.environ and int(os.environ["DBT_WASM_BUILD"]) == 1:
+    # Match the version numbers here
+    # https://pyodide.org/en/stable/usage/packages-in-pyodide.html
+    _install_requires.insert(0, "MarkupSafe==2.1.1")
+    _install_requires.insert(0, "Jinja2==3.1.1")
+else:
+    _install_requires.insert(0, "MarkupSafe>=0.23,<2.1")
+    _install_requires.insert(0, "Jinja2==2.11.3")
+    _install_requires.insert(14, "dbt-extractor~=0.4.1") # binary dependency not supported in pyodide
 
 setup(
     name=package_name,
@@ -47,29 +77,7 @@ setup(
             "dbt = dbt.main:main",
         ],
     },
-    install_requires=[
-        "Jinja2==2.11.3",
-        "MarkupSafe>=0.23,<2.1",
-        "agate>=1.6,<1.6.4",
-        "click>=7.0,<9",
-        "colorama>=0.3.9,<0.4.6",
-        "hologram>=0.0.14,<=0.0.15",
-        "isodate>=0.6,<0.7",
-        "logbook>=1.5,<1.6",
-        "mashumaro==2.9",
-        "minimal-snowplow-tracker==0.0.2",
-        "networkx>=2.3,<2.8.1;python_version<'3.8'",
-        "networkx>=2.3,<3;python_version>='3.8'",
-        "packaging>=20.9,<22.0",
-        "sqlparse>=0.2.3,<0.5",
-        "dbt-extractor~=0.4.1",
-        "typing-extensions>=3.7.4",
-        "werkzeug>=1,<3",
-        # the following are all to match snowflake-connector-python
-        "requests<3.0.0",
-        "idna>=2.5,<4",
-        "cffi>=1.9,<2.0.0",
-    ],
+    install_requires=_install_requires,
     zip_safe=False,
     classifiers=[
         "Development Status :: 5 - Production/Stable",

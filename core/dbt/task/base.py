@@ -76,7 +76,7 @@ class BaseTask(metaclass=ABCMeta):
 
     def __init__(self, args, config):
         self.args = args
-        self.args.single_threaded = False
+        self.args.single_threaded = False or flags.IS_PYODIDE
         self.config = config
 
     @classmethod

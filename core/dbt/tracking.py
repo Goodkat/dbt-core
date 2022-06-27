@@ -1,5 +1,6 @@
 from typing import Optional
 
+from dbt.clients.http import http
 from dbt.clients.yaml_helper import (  # noqa:F401
     yaml,
     safe_load,
@@ -25,7 +26,6 @@ import logbook
 import pytz
 import platform
 import uuid
-import requests
 import os
 
 sp_logger.setLevel(100)
@@ -81,7 +81,7 @@ class TimeoutEmitter(Emitter):
     def http_post(self, payload):
         self._log_request("POST", payload)
 
-        r = requests.post(
+        r = http.post(
             self.endpoint,
             data=payload,
             headers={"content-type": "application/json; charset=utf-8"},
@@ -94,7 +94,7 @@ class TimeoutEmitter(Emitter):
     def http_get(self, payload):
         self._log_request("GET", payload)
 
-        r = requests.get(self.endpoint, params=payload, timeout=5.0)
+        r = http.get_response(self.endpoint, params=payload, timeout=5.0)
 
         self._log_result("GET", r.status_code)
         return r
@@ -257,7 +257,7 @@ def get_dbt_env_context():
 
 
 def track(user, *args, **kwargs):
-    if user.do_not_track:
+    if user.do_not_track or flags.IS_PYODIDE:
         return
     else:
         fire_event(SendingEvent(kwargs=str(kwargs)))
@@ -472,7 +472,7 @@ class InvocationProcessor(logbook.Processor):
 
 def initialize_from_flags():
     # Setting these used to be in UserConfig, but had to be moved here
-    if flags.SEND_ANONYMOUS_USAGE_STATS:
-        initialize_tracking(flags.PROFILES_DIR)
-    else:
+    if not flags.SEND_ANONYMOUS_USAGE_STATS or flags.IS_PYODIDE:
         do_not_track()
+    else:
+        initialize_tracking(flags.PROFILES_DIR)
