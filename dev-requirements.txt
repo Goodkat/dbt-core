@@ -33,3 +33,4 @@ types-pytz
 types-requests
 types-setuptools
 wheel
+cryptography>=46.0.5 # not directly required, pinned by Snyk to avoid a vulnerability
